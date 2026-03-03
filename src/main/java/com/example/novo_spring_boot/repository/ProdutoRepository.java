@@ -13,15 +13,16 @@ import org.springframework.data.repository.query.Param;
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
 
-    Optional<Produto> findByIdAndUserUsername(Long id, String username);
-
     @Query("SELECT p FROM Produto p WHERE p.user.username = :username")
     List<Produto> findByUserUsername(@Param("username") String username);
 
-    List<Produto> findByUserUsername(String username);
+    @Query("SELECT p FROM Produto p WHERE p.id = :id AND p.user.username = :username")
+    Optional<Produto> findByIdAndUserUsername(@Param("id") Long id, @Param("username") String username);
+
     List<Produto> findByNomeContainingIgnoreCaseAndUserUsername(String nome, String username);
     List<Produto> findByTamanhoAndUserUsername(String tamanho, String username);
 }
+
 
 
 
