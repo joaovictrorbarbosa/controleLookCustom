@@ -22,13 +22,10 @@ public class ProdutoService {
         return produtoRepository.findByUserUsername(username);
     }
 
-    public Produto obterProdutoPorIdEUsuario(Long id, String username) {
-        return produtoRepository.findAll().stream() // Filtro manual simplificado ou use query no Repository
-            .filter(p -> p.getId().equals(id) && p.getUser().getUsername().equals(username))
-            .findFirst()
+   public Produto obterProdutoPorIdEUsuario(Long id, String username) {
+    return produtoRepository.findByIdAndUserUsername(id, username)
             .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado ou acesso negado."));
     }
-
     public Produto salvarProdutoComUsuario(Produto produto, String username) {
         Usuario usuario = usuarioRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
@@ -59,3 +56,4 @@ public class ProdutoService {
         return produtoRepository.save(produto);
     }
 }
+
