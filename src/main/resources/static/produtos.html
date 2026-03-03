@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Produtos</title>
+
+<style>
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+input {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    flex: 1;
+}
+
+button {
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.btn-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #007bff;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+/* Responsivo */
+@media (max-width: 600px) {
+    .form-group {
+        flex-direction: column;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    th {
+        display: none;
+    }
+
+    td {
+        text-align: left;
+        padding: 8px 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Cadastro de Produtos</h1>
+
+    <div class="form-group">
+    <input type="hidden" id="produtoId">
+
+    <input type="text" id="nome" placeholder="Nome do Produto">
+    <input type="text" id="tamanho" placeholder="Tamanho">
+    <input type="number" id="quantidade" placeholder="Quantidade">
+    <input type="number" id="preco" placeholder="Preço">
+
+    <button class="btn-success" onclick="salvarOuAtualizar()">Salvar</button>
+</div>
+
+    <!-- Pesquisas -->
+    <div class="form-group">
+        <input type="text" id="buscarNome" placeholder="Buscar por Nome">
+        <button class="btn-primary" onclick="buscarPorNome()">Pesquisar Nome</button>
+
+        <input type="text" id="buscarTamanho" placeholder="Buscar por Tamanho">
+        <button class="btn-primary" onclick="buscarPorTamanho()">Pesquisar Tamanho</button>
+    </div>
+
+    <!-- Tabela -->
+    <table>
+        <thead>
+    <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Tamanho</th>
+        <th>Quantidade</th>
+        <th>Preço</th>
+        <th>Ações</th>
+    </tr>
+</thead>
+        <tbody id="tabelaProdutos">
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+const API = "http://localhost:8080/api/produtos";
+const token = localStorage.getItem("token");
+
+if (!token) {
+    window.location.href = "login.html";
+}
+
+window.onload = listarProdutos;
+
+function listarProdutos() {
+    fetch(API, {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(res => res.json())
+    .then(data => renderTabela(data));
+}
+
+function salvarOuAtualizar() {
+    const id = document.getElementById("produtoId").value;
+    const nome = document.getElementById("nome").value;
+    const tamanho = document.getElementById("tamanho").value;
+    const quantidade = document.getElementById("quantidade").value;
+    const preco = document.getElementById("preco").value;
+
+    const produto = { nome, tamanho, quantidade, preco };
+
+    if (id) {
+        // Atualizar
+        fetch(`${API}/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify(produto)
+        })
+        .then(() => {
+            limparCampos();
+            listarProdutos();
+        });
+
+    } else {
+        // Salvar
+        fetch(API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify(produto)
+        })
+        .then(() => {
+            limparCampos();
+            listarProdutos();
+        });
+    }
+}
+
+function editar(produto) {
+    document.getElementById("produtoId").value = produto.id;
+    document.getElementById("nome").value = produto.nome;
+    document.getElementById("tamanho").value = produto.tamanho;
+    document.getElementById("quantidade").value = produto.quantidade;
+    document.getElementById("preco").value = produto.preco;
+}
+
+function excluir(id) {
+    if (!confirm("Deseja realmente excluir?")) return;
+
+    fetch(`${API}/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(() => listarProdutos());
+}
+
+function buscarPorNome() {
+    const nome = document.getElementById("buscarNome").value;
+
+    fetch(`${API}/buscarPorNome?nome=${nome}`, {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(res => {
+        if (res.status === 204) return [];
+        return res.json();
+    })
+    .then(data => renderTabela(data));
+}
+
+function buscarPorTamanho() {
+    const tamanho = document.getElementById("buscarTamanho").value;
+
+    fetch(`${API}/buscarPorTamanho?tamanho=${tamanho}`, {
+        headers: { "Authorization": "Bearer " + token }
+    })
+    .then(res => {
+        if (res.status === 204) return [];
+        return res.json();
+    })
+    .then(data => renderTabela(data));
+}
+
+function limparCampos() {
+    document.getElementById("produtoId").value = "";
+    document.getElementById("nome").value = "";
+    document.getElementById("tamanho").value = "";
+    document.getElementById("quantidade").value = "";
+    document.getElementById("preco").value = "";
+}
+
+function renderTabela(produtos) {
+    const tabela = document.getElementById("tabelaProdutos");
+    tabela.innerHTML = "";
+
+    produtos.forEach(produto => {
+        tabela.innerHTML += `
+            <tr>
+                <td>${produto.id}</td>
+                <td>${produto.nome}</td>
+                <td>${produto.tamanho}</td>
+                <td>${produto.quantidade}</td>
+                <td>R$ ${produto.preco}</td>
+                <td>
+                    <button class="btn-warning" onclick='editar(${JSON.stringify(produto)})'>Editar</button>
+                    <button class="btn-danger" onclick="excluir(${produto.id})">Excluir</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+</script>
+
+</body>
+</html>
