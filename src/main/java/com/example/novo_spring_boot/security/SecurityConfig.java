@@ -34,7 +34,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -42,17 +41,23 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/auth/**",
-                "/**.html",
-                "/**.css",
-                "/**.js"
-            ).permitAll()
-            .requestMatchers("/produtos/**").authenticated()
-            .anyRequest().authenticated()
-        )
-            .addFilterBefore(jwtAuthFilter,
-                    UsernamePasswordAuthenticationFilter.class);
+                // 1. Libera autenticação e arquivos estáticos
+                .requestMatchers(
+                    "/auth/**",
+                    "/",
+                    "/*.html",
+                    "/*.css",
+                    "/*.js",
+                    "/static/**"
+                ).permitAll()
+                
+                // 2. Protege as APIs de produtos (ajustado para /api/produtos)
+                .requestMatchers("/api/produtos/**").authenticated()
+                
+                // 3. Qualquer outra requisição precisa de login
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
