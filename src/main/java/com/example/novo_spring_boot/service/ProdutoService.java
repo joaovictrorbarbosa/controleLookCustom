@@ -1,56 +1,61 @@
 package com.example.novo_spring_boot.service;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import com.example.novo_spring_boot.exception.RecursoNaoEncontradoException;
 import com.example.novo_spring_boot.model.Produto;
+import com.example.novo_spring_boot.model.Usuario;
 import com.example.novo_spring_boot.repository.ProdutoRepository;
+import com.example.novo_spring_boot.repository.UsuarioRepository; // Certifique-se de ter este repositório
 
 @Service
 public class ProdutoService {
-    public final ProdutoRepository produtoRepository;
+    private final ProdutoRepository produtoRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public ProdutoService(ProdutoRepository produtoRepository) {
+    public ProdutoService(ProdutoRepository produtoRepository, UsuarioRepository usuarioRepository) {
         this.produtoRepository = produtoRepository;
+        this.usuarioRepository = usuarioRepository;
     }  
     
-    public List<Produto> listarProdutos() {
-        return produtoRepository.findAll();
+    public List<Produto> listarProdutosPorUsuario(String username) {
+        return produtoRepository.findByUserUsername(username);
     }
 
-    public Produto obterProdutoPorId(Long id) {
-        return produtoRepository.findById(id)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Produto com id " + id + " não encontrado"));
+    public Produto obterProdutoPorIdEUsuario(Long id, String username) {
+        return produtoRepository.findAll().stream() // Filtro manual simplificado ou use query no Repository
+            .filter(p -> p.getId().equals(id) && p.getUser().getUsername().equals(username))
+            .findFirst()
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado ou acesso negado."));
     }
 
-    public Produto salvarProduto(Produto produto) {
+    public Produto salvarProdutoComUsuario(Produto produto, String username) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        
+        produto.setUser(usuario); // Vincula o dono
         return produtoRepository.save(produto);
     }
 
-    public void excluirProduto(Long id) {
-        if(!produtoRepository.existsById(id)){
-            throw new RecursoNaoEncontradoException("Produto com id " + id + " não encontrado");
-        }
-        produtoRepository.deleteById(id);
+    public void excluirProdutoPorIdEUsuario(Long id, String username) {
+        Produto produto = obterProdutoPorIdEUsuario(id, username);
+        produtoRepository.delete(produto);
     }
 
-    public List<Produto> findByNome(String nome) {
-        return produtoRepository.findByNome(nome);
+    public List<Produto> findByNomeEUsuario(String nome, String username) {
+        return produtoRepository.findByNomeContainingIgnoreCaseAndUserUsername(nome, username);
     }
 
-    
-	public Produto atualizarProduto( Long id, Produto produto) {
-		if (produtoRepository.existsById(id)) {
-			produto.setId(id);
-			return produtoRepository.save(produto);
-		} else {
-			throw new RuntimeException("Produto não encontrado.");
-		}
-	}
+    public List<Produto> findByTamanhoEUsuario(String tamanho, String username) {
+        return produtoRepository.findByTamanhoAndUserUsername(tamanho, username);
+    }
 
-    public List<Produto> findByTamanho(String tamanho) {
-        return produtoRepository.findByTamanho(tamanho);
+    public Produto atualizarProdutoPorUsuario(Long id, Produto produto, String username) {
+        // Verifica se o produto existe e pertence ao usuário antes de atualizar
+        Produto existente = obterProdutoPorIdEUsuario(id, username);
+        
+        produto.setId(id);
+        produto.setUser(existente.getUser()); // Mantém o dono original
+        return produtoRepository.save(produto);
     }
 }
