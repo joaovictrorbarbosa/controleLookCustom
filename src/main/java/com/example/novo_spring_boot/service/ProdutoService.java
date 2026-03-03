@@ -19,8 +19,8 @@ public class ProdutoService {
     }  
     
     public List<Produto> listarProdutosPorUsuario(String username) {
-        return produtoRepository.findByUserUsername(username);
-    }
+    return produtoRepository.findByUserUsername(username.trim());
+}
 
    public Produto obterProdutoPorIdEUsuario(Long id, String username) {
     return produtoRepository.findByIdAndUserUsername(id, username)
@@ -56,4 +56,5 @@ public class ProdutoService {
         return produtoRepository.save(produto);
     }
 }
+
 
