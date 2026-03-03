@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 
 @Entity
@@ -13,6 +15,10 @@ public class Produto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Usuario user; // Importe sua classe de usuário (User ou Usuario)
 
     private String nome;
     private Double preco;
@@ -71,4 +77,13 @@ public class Produto {
     public void setTamanho(String tamanho) {
         this.tamanho = tamanho;
     }
+
+    public Usuario getUser() {
+    return user;
 }
+
+public void setUser(Usuario user) {
+    this.user = user;
+}
+}
+
