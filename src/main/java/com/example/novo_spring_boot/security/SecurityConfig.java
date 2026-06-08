@@ -84,10 +84,11 @@ public class SecurityConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(List.of("*"));
-        config.setAllowedMethods(List.of("*"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        // Configura a URL exata da Vercel para dar permissão global nas rotas seguras
+        config.setAllowedOrigins(List.of("https://controle-look-custom.vercel.app"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowCredentials(true); // Permite credenciais e cabeçalhos seguros
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
@@ -96,4 +97,3 @@ public class SecurityConfig {
 
         return source;
     }
-}
