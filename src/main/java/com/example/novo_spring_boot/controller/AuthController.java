@@ -2,6 +2,7 @@ package com.example.novo_spring_boot.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.example.novo_spring_boot.model.Usuario;
 import com.example.novo_spring_boot.security.JwtUtil;
