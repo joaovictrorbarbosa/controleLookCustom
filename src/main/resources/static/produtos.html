@@ -136,8 +136,8 @@
 </div>
 
 <script>
-    // CONFIGURAÇÃO DA API
-    const API = "https://controlelookcustom-api.onrender.com";
+    // CONFIGURAÇÃO DA API (Ajustado para o endpoint correto de produtos)
+    const API = "https://controlelookcustom-api.onrender.com/api/produtos";
     const token = localStorage.getItem("token");
 
     // Proteção de rota: se não houver token, volta para o login
@@ -158,6 +158,7 @@
                 window.location.href = "login.html";
                 return;
             }
+            if (!res.ok) throw new Error("Erro do servidor");
             return res.json();
         })
         .then(data => renderTabela(data))
@@ -233,7 +234,8 @@
             headers: { "Authorization": "Bearer " + token }
         })
         .then(res => res.status === 204 ? [] : res.json())
-        .then(data => renderTabela(data));
+        .then(data => renderTabela(data))
+        .catch(err => console.error("Erro na busca por nome:", err));
     }
 
     function buscarPorTamanho() {
@@ -242,7 +244,8 @@
             headers: { "Authorization": "Bearer " + token }
         })
         .then(res => res.status === 204 ? [] : res.json())
-        .then(data => renderTabela(data));
+        .then(data => renderTabela(data))
+        .catch(err => console.error("Erro na busca por tamanho:", err));
     }
 
     function limparCampos() {
@@ -263,7 +266,6 @@
         }
 
         produtos.forEach(produto => {
-            // Criação da linha usando Template Literals
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td data-label="ID">${produto.id}</td>
@@ -280,7 +282,6 @@
         });
     }
 
-    // Função auxiliar para evitar problemas de aspas no HTML
     function prepararEdicao(produto) {
         editar(produto);
     }
