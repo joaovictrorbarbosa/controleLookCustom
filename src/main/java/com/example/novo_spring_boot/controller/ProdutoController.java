@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/produtos")
-@CrossOrigin(origins = "https://lookcustom.vercel.app")
+@CrossOrigin(origins = "https://controle-look-custom.vercel.app")
 public class ProdutoController {
     
     private final ProdutoService produtoService;
