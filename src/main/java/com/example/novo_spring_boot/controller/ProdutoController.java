@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/produtos")
+@CrossOrigin(origins = "https://lookcustom.vercel.app")
 public class ProdutoController {
     
     private final ProdutoService produtoService;
