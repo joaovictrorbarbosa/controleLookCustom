@@ -48,7 +48,14 @@ public class SecurityConfig {
                     "/*.html",
                     "/*.css",
                     "/*.js",
-                    "/static/**"
+                    "/static/**",
+                    
+                    // --- ROTAS DO SWAGGER / OPENAPI ---
+                    "/v3/api-docs",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+
                 ).permitAll()
                 
                 // 2. Protege as APIs de produtos (ajustado para /api/produtos)
