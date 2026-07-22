@@ -52,7 +52,31 @@ Aplicacao em Producao (Frontend): https://controle-look-custom.vercel.app/login.
 [ Banco PostgreSQL ]
 ```
 
-Como Executar ou Rodar o Projeto
+## Documentação da API (Swagger / OpenAPI)
+
+A API conta com documentação interativa gerada via **Springdoc OpenAPI**.
+
+### Como acessar a documentação:
+1. Inicie a aplicação localmente:
+   ```bash
+   .\mvnw spring-boot:run
+Acesse a interface no seu navegador:
+ http://localhost:8080/swagger-ui/index.html
+
+Como testar rotas protegidas no Swagger:
+Acesse a rota POST /auth/register e crie um usuário.
+
+Acesse a rota POST /auth/login com os dados criados e execute a requisição.
+
+Copie o Token JWT retornado na resposta.
+
+Clique no botão Authorize (canto superior direito da página).
+
+Cole o token no campo de texto e clique em Authorize.
+
+Pronto! As rotas de /api/produtos agora estarão liberadas para teste direto pelo navegador.
+
+## Como Executar ou Rodar o Projeto
 1. Acesso Direto (Ambiente de Producao)
 A aplicacao web completa esta no ar e integrada com o backend em nuvem:
 
@@ -63,7 +87,6 @@ Pre-requisitos
 Java 17+
 
 Docker e Docker Compose
-
 Passo a Passo
 Clone o repositorio:
 
