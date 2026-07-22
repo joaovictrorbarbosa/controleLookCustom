@@ -1,0 +1,16 @@
+com\example\novo_spring_boot\controller\ControllerMVC.class
+com\example\novo_spring_boot\service\ProdutoService.class
+com\example\novo_spring_boot\repository\ProdutoRepository.class
+com\example\novo_spring_boot\NovoSpringBootApplication.class
+com\example\novo_spring_boot\model\Usuario.class
+com\example\novo_spring_boot\exception\RecursoNaoEncontradoException.class
+com\example\novo_spring_boot\security\JwtUtil.class
+com\example\novo_spring_boot\controller\AuthController.class
+com\example\novo_spring_boot\repository\UsuarioRepository.class
+com\example\novo_spring_boot\model\Produto.class
+com\example\novo_spring_boot\security\SecurityConfig.class
+com\example\novo_spring_boot\controller\ProdutoController.class
+com\example\novo_spring_boot\security\JwtAuthFilter.class
+com\example\novo_spring_boot\service\UsuarioDetailsService.class
+com\example\novo_spring_boot\exception\GlobalExceptionHandler.class
+com\example\novo_spring_boot\service\UsuarioService.class

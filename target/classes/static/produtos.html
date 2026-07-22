@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - Controle Look Custom</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-success:hover { background-color: #1e7e34; }
+
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-warning:hover { background-color: #e0a800; }
+
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #c82333; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:nth-child(even) { background-color: #f2f2f2; }
+
+        @media (max-width: 600px) {
+            .form-group { flex-direction: column; }
+            table, thead, tbody, th, td, tr { display: block; }
+            tr { margin-bottom: 15px; border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+            th { display: none; }
+            td { text-align: left; padding: 8px 0; border: none; }
+            td::before { content: attr(data-label); font-weight: bold; margin-right: 10px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Cadastro de Produtos</h1>
+
+    <div class="form-group">
+        <input type="hidden" id="produtoId">
+        <input type="text" id="nome" placeholder="Nome do Produto">
+        <input type="text" id="tamanho" placeholder="Tamanho">
+        <input type="number" id="quantidade" placeholder="Quantidade">
+        <input type="number" id="preco" placeholder="Preço" step="0.01">
+        <button class="btn-success" onclick="salvarOuAtualizar()">Salvar</button>
+        <button class="btn-primary" onclick="limparCampos()">Novo</button>
+    </div>
+
+    <div class="form-group" style="background: #e9ecef; padding: 15px; border-radius: 8px;">
+        <input type="text" id="buscarNome" placeholder="Buscar por Nome">
+        <button class="btn-primary" onclick="buscarPorNome()">Pesquisar Nome</button>
+
+        <input type="text" id="buscarTamanho" placeholder="Buscar por Tamanho">
+        <button class="btn-primary" onclick="buscarPorTamanho()">Pesquisar Tamanho</button>
+        
+        <button class="btn-warning" onclick="listarProdutos()">Limpar Busca</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Tamanho</th>
+                <th>Quantidade</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaProdutos">
+            </tbody>
+    </table>
+</div>
+
+<script>
+    // CONFIGURAÇÃO DA API (Ajustado para o endpoint correto de produtos)
+    const API = "https://controlelookcustom-api.onrender.com/api/produtos";
+    const token = localStorage.getItem("token");
+
+    // Proteção de rota: se não houver token, volta para o login
+    if (!token) {
+        window.location.href = "login.html";
+    }
+
+    // Carrega os produtos ao abrir a página
+    window.onload = listarProdutos;
+
+    function listarProdutos() {
+        fetch(API, {
+            headers: { "Authorization": "Bearer " + token }
+        })
+        .then(res => {
+            if (res.status === 403) {
+                alert("Sessão expirada. Faça login novamente.");
+                window.location.href = "login.html";
+                return;
+            }
+            if (!res.ok) throw new Error("Erro do servidor");
+            return res.json();
+        })
+        .then(data => renderTabela(data))
+        .catch(err => console.error("Erro ao listar:", err));
+    }
+
+    function salvarOuAtualizar() {
+        const id = document.getElementById("produtoId").value;
+        const nome = document.getElementById("nome").value;
+        const tamanho = document.getElementById("tamanho").value;
+        
+        // Conversão obrigatória para evitar envio de Strings no JSON numérico
+        const quantidade = parseInt(document.getElementById("quantidade").value);
+        const preco = parseFloat(document.getElementById("preco").value);
+
+        if (!nome || isNaN(quantidade) || isNaN(preco)) {
+            alert("Preencha todos os campos corretamente!");
+            return;
+        }
+
+        const produto = { nome, tamanho, quantidade, preco };
+        const url = id ? `${API}/${id}` : API;
+        const method = id ? "PUT" : "POST";
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify(produto)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error("Erro na operação");
+            return res.json();
+        })
+        .then(() => {
+            alert(id ? "Produto atualizado!" : "Produto salvo!");
+            limparCampos();
+            listarProdutos();
+        })
+        .catch(err => alert("Erro ao salvar. Verifique a conexão com o banco."));
+    }
+
+    function editar(produto) {
+        document.getElementById("produtoId").value = produto.id;
+        document.getElementById("nome").value = produto.nome;
+        document.getElementById("tamanho").value = produto.tamanho;
+        document.getElementById("quantidade").value = produto.quantidade;
+        document.getElementById("preco").value = produto.preco;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function excluir(id) {
+        if (!confirm("Deseja realmente excluir este produto?")) return;
+
+        fetch(`${API}/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": "Bearer " + token }
+        })
+        .then(res => {
+            if (res.ok) {
+                listarProdutos();
+            } else {
+                alert("Erro ao excluir.");
+            }
+        });
+    }
+
+    function buscarPorNome() {
+        const nome = document.getElementById("buscarNome").value;
+        fetch(`${API}/buscarPorNome?nome=${nome}`, {
+            headers: { "Authorization": "Bearer " + token }
+        })
+        .then(res => res.status === 204 ? [] : res.json())
+        .then(data => renderTabela(data))
+        .catch(err => console.error("Erro na busca por nome:", err));
+    }
+
+    function buscarPorTamanho() {
+        const tamanho = document.getElementById("buscarTamanho").value;
+        fetch(`${API}/buscarPorTamanho?tamanho=${tamanho}`, {
+            headers: { "Authorization": "Bearer " + token }
+        })
+        .then(res => res.status === 204 ? [] : res.json())
+        .then(data => renderTabela(data))
+        .catch(err => console.error("Erro na busca por tamanho:", err));
+    }
+
+    function limparCampos() {
+        document.getElementById("produtoId").value = "";
+        document.getElementById("nome").value = "";
+        document.getElementById("tamanho").value = "";
+        document.getElementById("quantidade").value = "";
+        document.getElementById("preco").value = "";
+    }
+
+    function renderTabela(produtos) {
+        const tabela = document.getElementById("tabelaProdutos");
+        tabela.innerHTML = "";
+
+        if (!Array.isArray(produtos) || produtos.length === 0) {
+            tabela.innerHTML = "<tr><td colspan='6'>Nenhum produto encontrado.</td></tr>";
+            return;
+        }
+
+        produtos.forEach(produto => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td data-label="ID">${produto.id}</td>
+                <td data-label="Nome">${produto.nome}</td>
+                <td data-label="Tamanho">${produto.tamanho}</td>
+                <td data-label="Quantidade">${produto.quantidade}</td>
+                <td data-label="Preço">R$ ${Number(produto.preco).toFixed(2)}</td>
+                <td data-label="Ações">
+                    <button class="btn-warning" onclick='prepararEdicao(${JSON.stringify(produto)})'>Editar</button>
+                    <button class="btn-danger" onclick="excluir(${produto.id})">Excluir</button>
+                </td>
+            `;
+            tabela.appendChild(tr);
+        });
+    }
+
+    function prepararEdicao(produto) {
+        editar(produto);
+    }
+</script>
+
+</body>
+</html>

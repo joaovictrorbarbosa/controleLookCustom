@@ -1,0 +1,5 @@
+com\example\novo_spring_boot\controller\AuthControllerTest.class
+com\example\novo_spring_boot\NovoSpringBootApplicationTests.class
+com\example\novo_spring_boot\service\UsuarioServiceTest.class
+com\example\novo_spring_boot\repository\UsuarioRepositoryTest.class
+com\example\novo_spring_boot\service\ProdutoServiceTest.class
